@@ -15,7 +15,7 @@
 //THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
 //CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 //IN THE SOFTWARE.
-package com.microsoft.band.sdk.sampleapp.accelerometer;
+package com.microsoft.band.sdk.sampleapp.client;
 
 import com.microsoft.band.BandClient;
 import com.microsoft.band.BandClientManager;
@@ -37,13 +37,15 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 
-public class BandAccelerometerAppActivity extends Activity {
+public class MainActivity extends Activity {
 
 	private BandClient client = null;
 	private Button btnStart;
 	private TextView txtAccelerometer, txtGyroscope, txtStatus;
+
+	private SensorService sensorService;
 	
-	private BandAccelerometerEventListener mAccelerometerEventListener = new BandAccelerometerEventListener() {
+	/*private BandAccelerometerEventListener mAccelerometerEventListener = new BandAccelerometerEventListener() {
         @Override
         public void onBandAccelerometerChanged(final BandAccelerometerEvent event) {
             if (event != null) {
@@ -61,7 +63,7 @@ public class BandAccelerometerAppActivity extends Activity {
 						event.getAngularVelocityY(), event.getAngularVelocityZ()), txtGyroscope);
 			}
 		}
-	};
+	};*/
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +73,8 @@ public class BandAccelerometerAppActivity extends Activity {
         txtAccelerometer = (TextView) findViewById(R.id.txtAccel);
 		txtGyroscope = (TextView) findViewById(R.id.txtGyro);
 		txtStatus = (TextView) findViewById(R.id.txtStatus);
+
+		sensorService = new SensorService();
 
         btnStart = (Button) findViewById(R.id.btnStart);
         btnStart.setOnClickListener(new OnClickListener() {
@@ -97,21 +101,25 @@ public class BandAccelerometerAppActivity extends Activity {
 		super.onPause();
 		if (client != null) {
 			try {
-				client.getSensorManager().unregisterAccelerometerEventListener(mAccelerometerEventListener);
+				client.getSensorManager().unregisterAllListeners();
+				//TODO: I believe onPause happens when the activity loses focus, so we shouldn't shut off the sensor service here
 			} catch (BandIOException e) {
 				appendToUI(e.getMessage(), txtStatus);
 			}
 		}
 	}
-	
+
+	/**
+	 * asynchronous task for connecting to the Microsoft Band accelerometer and gyroscope sensors
+	 */
 	private class SensorSubscriptionTask extends AsyncTask<Void, Void, Void> {
 		@Override
 		protected Void doInBackground(Void... params) {
 			try {
 				if (getConnectedBandClient()) {
 					appendToUI("Band is connected.\n", txtStatus);
-					client.getSensorManager().registerAccelerometerEventListener(mAccelerometerEventListener, SampleRate.MS128);
-					client.getSensorManager().registerGyroscopeEventListener(mGyroscopeEventListener, SampleRate.MS128);
+					client.getSensorManager().registerAccelerometerEventListener(sensorService, SampleRate.MS128);
+					client.getSensorManager().registerGyroscopeEventListener(sensorService, SampleRate.MS128);
 				} else {
 					appendToUI("Band isn't connected. Please make sure bluetooth is on and the band is in range.\n", txtStatus);
 				}
@@ -159,7 +167,13 @@ public class BandAccelerometerAppActivity extends Activity {
             }
         });
 	}
-    
+
+	/**
+	 * Connects the mobile device to the Microsoft Band
+	 * @return True if successful, False otherwise
+	 * @throws InterruptedException if the connection is interrupted
+	 * @throws BandException if the band SDK version is not compatible or the Microsoft Health band is not installed
+	 */
 	private boolean getConnectedBandClient() throws InterruptedException, BandException {
 		if (client == null) {
 			BandInfo[] devices = BandClientManager.getInstance().getPairedBands();

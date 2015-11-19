@@ -5,7 +5,7 @@
  * should not be modified by hand.
  */
 
-package com.microsoft.band.sdk.sampleapp.accelerometer;
+package com.microsoft.band.sdk.sampleapp.client;
 
 public final class R {
     public static final class attr {
