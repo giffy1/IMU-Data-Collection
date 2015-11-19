@@ -25,6 +25,8 @@ import com.microsoft.band.BandIOException;
 import com.microsoft.band.ConnectionState;
 import com.microsoft.band.sensors.BandAccelerometerEvent;
 import com.microsoft.band.sensors.BandAccelerometerEventListener;
+import com.microsoft.band.sensors.BandGyroscopeEvent;
+import com.microsoft.band.sensors.BandGyroscopeEventListener;
 import com.microsoft.band.sensors.SampleRate;
 
 import android.os.Bundle;
@@ -39,30 +41,45 @@ public class BandAccelerometerAppActivity extends Activity {
 
 	private BandClient client = null;
 	private Button btnStart;
-	private TextView txtStatus;
+	private TextView txtAccelerometer, txtGyroscope, txtStatus;
 	
 	private BandAccelerometerEventListener mAccelerometerEventListener = new BandAccelerometerEventListener() {
         @Override
         public void onBandAccelerometerChanged(final BandAccelerometerEvent event) {
             if (event != null) {
             	appendToUI(String.format(" X = %.3f \n Y = %.3f\n Z = %.3f", event.getAccelerationX(),
-            			event.getAccelerationY(), event.getAccelerationZ()));
+            			event.getAccelerationY(), event.getAccelerationZ()), txtAccelerometer);
             }
         }
     };
+
+	private BandGyroscopeEventListener mGyroscopeEventListener = new BandGyroscopeEventListener() {
+		@Override
+		public void onBandGyroscopeChanged(final BandGyroscopeEvent event) {
+			if (event != null) {
+				appendToUI(String.format(" X = %.3f \n Y = %.3f\n Z = %.3f", event.getAngularVelocityX(),
+						event.getAngularVelocityY(), event.getAngularVelocityZ()), txtGyroscope);
+			}
+		}
+	};
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        txtStatus = (TextView) findViewById(R.id.txtStatus);
+        txtAccelerometer = (TextView) findViewById(R.id.txtAccel);
+		txtGyroscope = (TextView) findViewById(R.id.txtGyro);
+		txtStatus = (TextView) findViewById(R.id.txtStatus);
+
         btnStart = (Button) findViewById(R.id.btnStart);
         btnStart.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				txtAccelerometer.setText("");
+				txtGyroscope.setText("");
 				txtStatus.setText("");
-				new AccelerometerSubscriptionTask().execute();
+				new SensorSubscriptionTask().execute();
 			}
 		});
     }
@@ -70,6 +87,8 @@ public class BandAccelerometerAppActivity extends Activity {
     @Override
 	protected void onResume() {
 		super.onResume();
+		txtAccelerometer.setText("");
+		txtGyroscope.setText("");
 		txtStatus.setText("");
 	}
 	
@@ -80,20 +99,21 @@ public class BandAccelerometerAppActivity extends Activity {
 			try {
 				client.getSensorManager().unregisterAccelerometerEventListener(mAccelerometerEventListener);
 			} catch (BandIOException e) {
-				appendToUI(e.getMessage());
+				appendToUI(e.getMessage(), txtStatus);
 			}
 		}
 	}
 	
-	private class AccelerometerSubscriptionTask extends AsyncTask<Void, Void, Void> {
+	private class SensorSubscriptionTask extends AsyncTask<Void, Void, Void> {
 		@Override
 		protected Void doInBackground(Void... params) {
 			try {
 				if (getConnectedBandClient()) {
-					appendToUI("Band is connected.\n");
+					appendToUI("Band is connected.\n", txtStatus);
 					client.getSensorManager().registerAccelerometerEventListener(mAccelerometerEventListener, SampleRate.MS128);
+					client.getSensorManager().registerGyroscopeEventListener(mGyroscopeEventListener, SampleRate.MS128);
 				} else {
-					appendToUI("Band isn't connected. Please make sure bluetooth is on and the band is in range.\n");
+					appendToUI("Band isn't connected. Please make sure bluetooth is on and the band is in range.\n", txtStatus);
 				}
 			} catch (BandException e) {
 				String exceptionMessage="";
@@ -108,15 +128,15 @@ public class BandAccelerometerAppActivity extends Activity {
 					exceptionMessage = "Unknown error occured: " + e.getMessage() + "\n";
 					break;
 				}
-				appendToUI(exceptionMessage);
+				appendToUI(exceptionMessage, txtStatus);
 
 			} catch (Exception e) {
-				appendToUI(e.getMessage());
+				appendToUI(e.getMessage(), txtStatus);
 			}
 			return null;
 		}
 	}
-	
+
     @Override
     protected void onDestroy() {
         if (client != null) {
@@ -131,11 +151,11 @@ public class BandAccelerometerAppActivity extends Activity {
         super.onDestroy();
     }
 
-	private void appendToUI(final String string) {
+	private void appendToUI(final String string, final TextView textView) {
 		this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-            	txtStatus.setText(string);
+            	textView.setText(string);
             }
         });
 	}
@@ -144,7 +164,7 @@ public class BandAccelerometerAppActivity extends Activity {
 		if (client == null) {
 			BandInfo[] devices = BandClientManager.getInstance().getPairedBands();
 			if (devices.length == 0) {
-				appendToUI("Band isn't paired with your phone.\n");
+				appendToUI("Band isn't paired with your phone.\n", txtStatus);
 				return false;
 			}
 			client = BandClientManager.getInstance().create(getBaseContext(), devices[0]);
@@ -152,7 +172,7 @@ public class BandAccelerometerAppActivity extends Activity {
 			return true;
 		}
 		
-		appendToUI("Band is connecting...\n");
+		appendToUI("Band is connecting...\n", txtStatus);
 		return ConnectionState.CONNECTED == client.connect().await();
 	}
 }
