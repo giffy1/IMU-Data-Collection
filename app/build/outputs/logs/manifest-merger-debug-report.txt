@@ -15,6 +15,8 @@ ADDED from AndroidManifest.xml:2:1
 		INJECTED from AndroidManifest.xml:0:0
 uses-sdk
 ADDED from AndroidManifest.xml:7:5
+MERGED from com.android.support:appcompat-v7:22.2.0:20:5
+MERGED from com.android.support:support-v4:22.2.0:20:5
 	android:targetSdkVersion
 		ADDED from AndroidManifest.xml:9:9
 		INJECTED from AndroidManifest.xml:0:0
@@ -31,31 +33,41 @@ uses-permission#com.microsoft.band.service.access.BIND_BAND_SERVICE
 ADDED from AndroidManifest.xml:12:5
 	android:name
 		ADDED from AndroidManifest.xml:12:22
+uses-permission#android.permission.WRITE_EXTERNAL_STORAGE
+ADDED from AndroidManifest.xml:13:5
+	android:name
+		ADDED from AndroidManifest.xml:13:22
 application
-ADDED from AndroidManifest.xml:15:5
+ADDED from AndroidManifest.xml:16:5
+MERGED from com.android.support:appcompat-v7:22.2.0:22:5
+MERGED from com.android.support:support-v4:22.2.0:22:5
 	android:label
-		ADDED from AndroidManifest.xml:18:9
-	android:allowBackup
-		ADDED from AndroidManifest.xml:16:9
-	android:icon
-		ADDED from AndroidManifest.xml:17:9
-	android:theme
 		ADDED from AndroidManifest.xml:19:9
-activity#com.microsoft.band.sdk.sampleapp.accelerometer.BandAccelerometerAppActivity
-ADDED from AndroidManifest.xml:20:9
+	android:allowBackup
+		ADDED from AndroidManifest.xml:17:9
+	android:icon
+		ADDED from AndroidManifest.xml:18:9
+	android:theme
+		ADDED from AndroidManifest.xml:20:9
+activity#com.microsoft.band.client.MainActivity
+ADDED from AndroidManifest.xml:21:9
 	android:screenOrientation
-		ADDED from AndroidManifest.xml:22:13
-	android:label
 		ADDED from AndroidManifest.xml:23:13
+	android:label
+		ADDED from AndroidManifest.xml:24:13
 	android:name
-		ADDED from AndroidManifest.xml:21:13
+		ADDED from AndroidManifest.xml:22:13
 intent-filter#android.intent.action.MAIN+android.intent.category.LAUNCHER
-ADDED from AndroidManifest.xml:24:13
+ADDED from AndroidManifest.xml:25:13
 action#android.intent.action.MAIN
-ADDED from AndroidManifest.xml:25:17
+ADDED from AndroidManifest.xml:26:17
 	android:name
-		ADDED from AndroidManifest.xml:25:25
+		ADDED from AndroidManifest.xml:26:25
 category#android.intent.category.LAUNCHER
-ADDED from AndroidManifest.xml:27:17
+ADDED from AndroidManifest.xml:28:17
 	android:name
-		ADDED from AndroidManifest.xml:27:27
+		ADDED from AndroidManifest.xml:28:27
+service#com.microsoft.band.client.SensorService
+ADDED from AndroidManifest.xml:31:9
+	android:name
+		ADDED from AndroidManifest.xml:31:18

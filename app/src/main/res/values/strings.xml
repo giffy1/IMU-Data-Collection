@@ -9,5 +9,7 @@
         2. Make sure Microsoft Health is installed\n        
         3. Press the Start button\n
         4. Data from the accelerometer sensor should be displayed.</string>
-    <string name="start">Start</string>
+    <string name="start_service">Start Service</string>
+    <string name="stop_service">Stop Service</string>
+    <string name="msg_service_started">"Collecting sensor data…"</string>
 </resources>
